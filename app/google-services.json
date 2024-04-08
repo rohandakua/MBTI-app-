@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "110781010451",
+    "project_id": "mbpt-c45d2",
+    "storage_bucket": "mbpt-c45d2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110781010451:android:332580f04ab12221f3a5e6",
+        "android_client_info": {
+          "package_name": "com.example.mbpt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGyvNjQnBKyL5x5rX5UhsF_y1BPlE8I2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

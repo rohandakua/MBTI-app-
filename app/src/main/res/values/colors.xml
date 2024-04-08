@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="button">#724747</color>
+    <color name="tvcolor">#6F7722</color>
+    <color name="red">#DD898C</color>
+    <color name="redt">#0C0725</color>
+    <color name="green">#C5EF95</color>
+    <color name="greent">#051107</color>
+    <color name="grey">#CFCFCF</color>
+    <color name="greyt">#0E0202</color>
+</resources>
