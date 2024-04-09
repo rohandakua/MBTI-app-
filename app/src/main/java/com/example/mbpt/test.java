@@ -15,6 +15,9 @@ import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 
 
@@ -37,6 +40,9 @@ public class test extends AppCompatActivity {
     String[] qr;
     int quesAttempted=0;
     int howManySkipped=0;
+    FirebaseDatabase database ;
+    DatabaseReference databaseReference;
+
 
 
     public void ffgetId(){
@@ -91,7 +97,10 @@ public class test extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(quesAttempted==70) {
+                    String personalityType = calculate();
                     Intent i = new Intent(test.this, Home.class);
+                    i.putExtra("source","test");
+                    i.putExtra("personalityType" , personalityType);
                     startActivity(i);
                 }else{
                     Toast.makeText(getApplicationContext(),"Please answer all 70 questions",Toast.LENGTH_SHORT).show();
@@ -117,6 +126,62 @@ public class test extends AppCompatActivity {
 
             }
         });
+
+
+
+
+    }
+    public class ansData{
+        public int a;
+        public int b;
+
+    }
+    public String calculate(){
+        ansData col1=new ansData(),col2=new ansData(),col3=new ansData(),col4=new ansData(),col5=new ansData(),col6=new ansData(),col7=new ansData();
+        for(int i=1;i<65;i=i+7){
+            col1.a += (arr[i].option == 0) ? 1 : 0 ;
+            col1.b += (arr[i].option == 0) ? 0 : 1 ;
+
+            col2.a += (arr[i+1].option == 0) ? 1 : 0 ;
+            col2.b += (arr[i+1].option == 0) ? 0 : 1 ;
+
+            col3.a += (arr[i+2].option == 0) ? 1 : 0 ;
+            col3.b += (arr[i+2].option == 0) ? 0 : 1 ;
+
+            col4.a += (arr[i+3].option == 0) ? 1 : 0 ;
+            col4.b += (arr[i+3].option == 0) ? 0 : 1 ;
+
+            col5.a += (arr[i+4].option == 0) ? 1 : 0 ;
+            col5.b += (arr[i+4].option == 0) ? 0 : 1 ;
+
+            col6.a += (arr[i+5].option == 0) ? 1 : 0 ;
+            col6.b += (arr[i+5].option == 0) ? 0 : 1 ;
+
+            col7.a += (arr[i+6].option == 0) ? 1 : 0 ;
+            col7.b += (arr[i+6].option == 0) ? 0 : 1 ;
+
+
+        }
+
+        int e = 0 ,i = 0 , s = 0 , n = 0 , t = 0 , f = 0 , j = 0 , p = 0 ;
+        e = col1.a ;
+        i = col1.b ;
+        s = col2.a + col3.a ;
+        n = col2.b + col3.b ;
+        t = col4.a + col5.a ;
+        f = col4.b + col5.b ;
+        j = col6.a + col7.a ;
+        p = col6.b + col7.b ;
+
+        StringBuilder personality = new StringBuilder() ;
+        personality.append( (e>i) ? 'E' : 'I' );
+        personality.append( (s>n) ? 'S' : 'N' );
+        personality.append( (t>f) ? 'T' : 'F' );
+        personality.append( (j>p) ? 'J' : "P" );
+        String ans = personality.toString() ;
+        return ans ;
+
+
 
 
 

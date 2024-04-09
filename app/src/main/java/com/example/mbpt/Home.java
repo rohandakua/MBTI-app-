@@ -34,9 +34,23 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         getId();
-        Intent intent=getIntent();
-        String name =intent.getStringExtra("name");
-        String uid=intent.getStringExtra("uid");
+        String name="";
+        String uid="";
+        String type="";
+        Intent intent = getIntent();
+        String source = intent.getStringExtra("source");
+        if (source != null && source.equals("signIn")) {
+            name =intent.getStringExtra("name");
+            uid=intent.getStringExtra("uid");
+        } else if (source != null && source.equals("test")) {
+            type = intent.getStringExtra("personalityType");
+        }
+
+        tv1.setText(name.toUpperCase()+"\n"+uid+"\n"+type);
+
+
+
+
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,5 +88,8 @@ public class Home extends AppCompatActivity {
                 startActivity(i);
             }
         });
+
+
+
     }
 }
