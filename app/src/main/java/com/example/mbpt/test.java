@@ -102,64 +102,72 @@ public class test extends AppCompatActivity {
 
         //submitt btn1
         btn1.setOnClickListener(new View.OnClickListener() {
-            int what=0;
             @Override
             public void onClick(View view) {
-                if(quesAttempted==70) {
+                if (quesAttempted == 70) {
                     String personalityType = calculate();
-                    Log.d("personality",personalityType);
+                    Log.d("personality", personalityType);
 
-                    // making changes here
+                    // Check if the user exists in the database
                     databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.hasChild(uid)){
-
-                                what=1;
-                            }else{
-                                what=2;
+                            if (snapshot.hasChild(uid)) {
+                                // User exists, update their personality type
+                                DatabaseReference db = database.getReference("userPersonality/" + uid);
+                                db.setValue(new personalityData(uid, personalityType))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(getApplicationContext(), "Successfully updated :)", Toast.LENGTH_SHORT).show();
+                                                // Redirect to Home activity
+                                                Intent i = new Intent(test.this, Home.class);
+                                                i.putExtra("source", "test");
+                                                i.putExtra("personalityType", personalityType);
+                                                startActivity(i);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getApplicationContext(), "Sorry Error 402 :(", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            } else {
+                                // User doesn't exist, add their personality type
+                                DatabaseReference db = database.getReference("userPersonality/" + uid);
+                                db.setValue(new personalityData(uid, personalityType))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(getApplicationContext(), "Successfully added :)", Toast.LENGTH_SHORT).show();
+                                                // Redirect to Home activity
+                                                Intent i = new Intent(test.this, Home.class);
+                                                i.putExtra("source", "test");
+                                                i.putExtra("personalityType", personalityType);
+                                                startActivity(i);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getApplicationContext(), "Sorry Error 402 :(", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                             }
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
-                            Toast.makeText(getApplicationContext(),"Error in accessing database",Toast.LENGTH_SHORT).show();
-
+                            Toast.makeText(getApplicationContext(), "Error in accessing database", Toast.LENGTH_SHORT).show();
                         }
                     });
-
-
-                    personalityData pd = new personalityData(uid,personalityType);
-                    // making changes
-                    if(what==1){
-                        DatabaseReference db=database.getReference("userPersonality/"+uid);
-                        db.setValue(pd);
-
-                    } else if (what==2) {
-                        databaseReference.child(uid).setValue(pd).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Toast.makeText(getApplicationContext(),"Successfully updated :)",Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(),"Sorry Error 402 :(",Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-                    }
-
-                    Intent i = new Intent(test.this, Home.class);
-                    i.putExtra("source","test");
-                    i.putExtra("personalityType" , personalityType);
-                    startActivity(i);
-                }else{
-                    Toast.makeText(getApplicationContext(),"Please answer all 70 questions",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please answer all 70 questions", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -62,8 +62,9 @@ public class Home extends AppCompatActivity {
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()){
-                    personalityData pd = dataSnapshot.getValue(personalityData.class);  // set the information and data about personality
+                    personalityData pd = dataSnapshot.getValue(personalityData.class);// set the information and data about personality
                     tv3.setText(pd.personalityType);
+
                 }else{
                     Toast.makeText(getApplicationContext(),"Failed to get any previous personality test's result",Toast.LENGTH_SHORT).show();
                     tv2.setText("Give Test !!!");
