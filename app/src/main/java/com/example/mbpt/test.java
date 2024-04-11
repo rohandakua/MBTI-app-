@@ -1,9 +1,12 @@
 package com.example.mbpt;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,8 +18,13 @@ import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -66,9 +74,13 @@ public class test extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+
         intialize();
         ffgetId();
         setQues();
+        String uid=getIntent().getStringExtra("uid").toString();
+        database = FirebaseDatabase.getInstance();
+        databaseReference = database.getReference("userPersonality");
         ArrayAdapter adapter=new ArrayAdapter(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,qr);
 
         adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
@@ -88,16 +100,57 @@ public class test extends AppCompatActivity {
             }
         });
 
-
-
-
-
         //submitt btn1
         btn1.setOnClickListener(new View.OnClickListener() {
+            int what=0;
             @Override
             public void onClick(View view) {
                 if(quesAttempted==70) {
                     String personalityType = calculate();
+                    Log.d("personality",personalityType);
+
+                    // making changes here
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.hasChild(uid)){
+
+                                what=1;
+                            }else{
+                                what=2;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(getApplicationContext(),"Error in accessing database",Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+
+                    personalityData pd = new personalityData(uid,personalityType);
+                    // making changes
+                    if(what==1){
+                        DatabaseReference db=database.getReference("userPersonality/"+uid);
+                        db.setValue(pd);
+
+                    } else if (what==2) {
+                        databaseReference.child(uid).setValue(pd).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Toast.makeText(getApplicationContext(),"Successfully updated :)",Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(),"Sorry Error 402 :(",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+
+                    }
+
                     Intent i = new Intent(test.this, Home.class);
                     i.putExtra("source","test");
                     i.putExtra("personalityType" , personalityType);
@@ -113,7 +166,12 @@ public class test extends AppCompatActivity {
             public void onClick(View view) {
                 evaluate();
                 index++;
-                displayQuestion();
+                if(index==70){
+                    btn1.performClick();
+                }else{
+                    displayQuestion();
+
+                }
             }
         });
 
@@ -138,7 +196,7 @@ public class test extends AppCompatActivity {
     }
     public String calculate(){
         ansData col1=new ansData(),col2=new ansData(),col3=new ansData(),col4=new ansData(),col5=new ansData(),col6=new ansData(),col7=new ansData();
-        for(int i=1;i<65;i=i+7){
+        for(int i=0;i<65;i=i+7){
             col1.a += (arr[i].option == 0) ? 1 : 0 ;
             col1.b += (arr[i].option == 0) ? 0 : 1 ;
 
@@ -178,8 +236,7 @@ public class test extends AppCompatActivity {
         personality.append( (s>n) ? 'S' : 'N' );
         personality.append( (t>f) ? 'T' : 'F' );
         personality.append( (j>p) ? 'J' : "P" );
-        String ans = personality.toString() ;
-        return ans ;
+        return personality.toString();
 
 
 
@@ -191,11 +248,11 @@ public class test extends AppCompatActivity {
         tv1.setText("Ques no - "+(index+1));
         tvHowManyAttempted.setText("Attempted - "+quesAttempted+"/70");
         tvhowManySkipped.setText("Skipped - "+howManySkipped+"/70");
-        if(quesReport[index].attempt==false){
+        if(index <quesReport.length && quesReport[index].attempt==false){
             crg1.clearCheck();
 
         }else{
-            if(arr[index].option==0){
+            if(index <quesReport.length && arr[index].option==0){
                 opt1.setChecked(true);
             }else{
                 opt2.setChecked(true);
@@ -212,23 +269,23 @@ public class test extends AppCompatActivity {
     public void evaluate(){
 
         int selected= crg1.getCheckedRadioButtonId();
-        if(quesReport[index].attempt==false) {
+        if(index <quesReport.length && quesReport[index].attempt==false) {
 
 
             if (selected != -1) {
                 RadioButton select = findViewById(selected);
                 String selectedOption = select.getText().toString();
-                if (arr[index].a.equals(selectedOption)) {
+                if (index <quesReport.length && arr[index].a.equals(selectedOption)) {
                     arr[index].option = 0;
-                } else {
+                } else if(index <quesReport.length ) {
                     arr[index].option = 1;
                 }
 
-                if (quesReport[index].saw == true) {
+                if (index <quesReport.length && quesReport[index].saw == true) {
                     quesReport[index].attempt = true;
                     howManySkipped--;
                     quesAttempted++;
-                } else {
+                } else if(index <quesReport.length){
                     quesReport[index].saw = true;
                     quesReport[index].attempt = true;
                     quesAttempted++;
@@ -236,10 +293,10 @@ public class test extends AppCompatActivity {
                 }
 
             } else {
-                if (quesReport[index].saw == true) {
+                if (index <quesReport.length && quesReport[index].saw == true) {
                     quesReport[index].attempt = false;
 
-                } else {
+                } else if(index <quesReport.length ){
                     quesReport[index].saw = true;
                     quesReport[index].attempt = false;
                     howManySkipped++;
@@ -251,9 +308,9 @@ public class test extends AppCompatActivity {
             if (selected != -1) {
                 RadioButton select = findViewById(selected);
                 String selectedOption = select.getText().toString();
-                if (arr[index].a.equals(selectedOption)) {
+                if (index <quesReport.length && arr[index].a.equals(selectedOption)) {
                     arr[index].option = 0;
-                } else {
+                } else if(index <quesReport.length ) {
                     arr[index].option = 1;
                 }
             }
