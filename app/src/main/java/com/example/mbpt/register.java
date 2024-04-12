@@ -67,7 +67,7 @@ public class register extends AppCompatActivity {
                         }
                     });
                     if(y==1){
-                        reference.child("user").child(uid).setValue(rd).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        reference.child(uid).setValue(rd).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 tiet1.setText("");
@@ -75,6 +75,11 @@ public class register extends AppCompatActivity {
                                 tiet3.setText("");
 
                                 Toast.makeText(getApplicationContext(),"registered successfully :) ",Toast.LENGTH_SHORT).show();
+                                Intent intent1=new Intent(register.this, Home.class);
+                                intent1.putExtra("uid",rd.uid);
+                                intent1.putExtra("name",rd.name);
+                                intent1.putExtra("source","register");
+                                startActivity(intent1);
                                 finish();
                             }
                         }).addOnFailureListener(new OnFailureListener() {

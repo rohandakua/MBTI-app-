@@ -1,9 +1,12 @@
 package com.example.mbpt;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,6 +17,14 @@ import android.widget.Spinner;
 import android.widget.TextClock;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -37,6 +48,9 @@ public class test extends AppCompatActivity {
     String[] qr;
     int quesAttempted=0;
     int howManySkipped=0;
+    FirebaseDatabase database ;
+    DatabaseReference databaseReference;
+
 
 
     public void ffgetId(){
@@ -60,9 +74,13 @@ public class test extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+
         intialize();
         ffgetId();
         setQues();
+        String uid=getIntent().getStringExtra("uid").toString();
+        database = FirebaseDatabase.getInstance();
+        databaseReference = database.getReference("userPersonality");
         ArrayAdapter adapter=new ArrayAdapter(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,qr);
 
         adapter.setDropDownViewResource(androidx.appcompat.R.layout.support_simple_spinner_dropdown_item);
@@ -82,29 +100,86 @@ public class test extends AppCompatActivity {
             }
         });
 
-
-
-
-
         //submitt btn1
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(quesAttempted==70) {
-                    Intent i = new Intent(test.this, Home.class);
-                    startActivity(i);
-                }else{
-                    Toast.makeText(getApplicationContext(),"Please answer all 70 questions",Toast.LENGTH_SHORT).show();
+                if (quesAttempted == 70) {
+                    String personalityType = calculate();
+                    Log.d("personality", personalityType);
+
+                    // Check if the user exists in the database
+                    databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.hasChild(uid)) {
+                                // User exists, update their personality type
+                                DatabaseReference db = database.getReference("userPersonality/" + uid);
+                                db.setValue(new personalityData(uid, personalityType))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(getApplicationContext(), "Successfully updated :)", Toast.LENGTH_SHORT).show();
+                                                // Redirect to Home activity
+                                                Intent i = new Intent(test.this, Home.class);
+                                                i.putExtra("source", "test");
+                                                i.putExtra("personalityType", personalityType);
+                                                startActivity(i);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getApplicationContext(), "Sorry Error 402 :(", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            } else {
+                                // User doesn't exist, add their personality type
+                                DatabaseReference db = database.getReference("userPersonality/" + uid);
+                                db.setValue(new personalityData(uid, personalityType))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(getApplicationContext(), "Successfully added :)", Toast.LENGTH_SHORT).show();
+                                                // Redirect to Home activity
+                                                Intent i = new Intent(test.this, Home.class);
+                                                i.putExtra("source", "test");
+                                                i.putExtra("personalityType", personalityType);
+                                                startActivity(i);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getApplicationContext(), "Sorry Error 402 :(", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(getApplicationContext(), "Error in accessing database", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please answer all 70 questions", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 evaluate();
                 index++;
-                displayQuestion();
+                if(index==70){
+                    btn1.performClick();
+                }else{
+                    displayQuestion();
+
+                }
             }
         });
 
@@ -122,15 +197,70 @@ public class test extends AppCompatActivity {
 
 
     }
+    public class ansData{
+        public int a;
+        public int b;
+
+    }
+    public String calculate(){
+        ansData col1=new ansData(),col2=new ansData(),col3=new ansData(),col4=new ansData(),col5=new ansData(),col6=new ansData(),col7=new ansData();
+        for(int i=0;i<65;i=i+7){
+            col1.a += (arr[i].option == 0) ? 1 : 0 ;
+            col1.b += (arr[i].option == 0) ? 0 : 1 ;
+
+            col2.a += (arr[i+1].option == 0) ? 1 : 0 ;
+            col2.b += (arr[i+1].option == 0) ? 0 : 1 ;
+
+            col3.a += (arr[i+2].option == 0) ? 1 : 0 ;
+            col3.b += (arr[i+2].option == 0) ? 0 : 1 ;
+
+            col4.a += (arr[i+3].option == 0) ? 1 : 0 ;
+            col4.b += (arr[i+3].option == 0) ? 0 : 1 ;
+
+            col5.a += (arr[i+4].option == 0) ? 1 : 0 ;
+            col5.b += (arr[i+4].option == 0) ? 0 : 1 ;
+
+            col6.a += (arr[i+5].option == 0) ? 1 : 0 ;
+            col6.b += (arr[i+5].option == 0) ? 0 : 1 ;
+
+            col7.a += (arr[i+6].option == 0) ? 1 : 0 ;
+            col7.b += (arr[i+6].option == 0) ? 0 : 1 ;
+
+
+        }
+
+        int e = 0 ,i = 0 , s = 0 , n = 0 , t = 0 , f = 0 , j = 0 , p = 0 ;
+        e = col1.a ;
+        i = col1.b ;
+        s = col2.a + col3.a ;
+        n = col2.b + col3.b ;
+        t = col4.a + col5.a ;
+        f = col4.b + col5.b ;
+        j = col6.a + col7.a ;
+        p = col6.b + col7.b ;
+
+        StringBuilder personality = new StringBuilder() ;
+        personality.append( (e>i) ? 'E' : 'I' );
+        personality.append( (s>n) ? 'S' : 'N' );
+        personality.append( (t>f) ? 'T' : 'F' );
+        personality.append( (j>p) ? 'J' : "P" );
+        return personality.toString();
+
+
+
+
+
+
+    }
     public void displayQuestion(){
         tv1.setText("Ques no - "+(index+1));
         tvHowManyAttempted.setText("Attempted - "+quesAttempted+"/70");
         tvhowManySkipped.setText("Skipped - "+howManySkipped+"/70");
-        if(quesReport[index].attempt==false){
+        if(index <quesReport.length && quesReport[index].attempt==false){
             crg1.clearCheck();
 
         }else{
-            if(arr[index].option==0){
+            if(index <quesReport.length && arr[index].option==0){
                 opt1.setChecked(true);
             }else{
                 opt2.setChecked(true);
@@ -147,23 +277,23 @@ public class test extends AppCompatActivity {
     public void evaluate(){
 
         int selected= crg1.getCheckedRadioButtonId();
-        if(quesReport[index].attempt==false) {
+        if(index <quesReport.length && quesReport[index].attempt==false) {
 
 
             if (selected != -1) {
                 RadioButton select = findViewById(selected);
                 String selectedOption = select.getText().toString();
-                if (arr[index].a.equals(selectedOption)) {
+                if (index <quesReport.length && arr[index].a.equals(selectedOption)) {
                     arr[index].option = 0;
-                } else {
+                } else if(index <quesReport.length ) {
                     arr[index].option = 1;
                 }
 
-                if (quesReport[index].saw == true) {
+                if (index <quesReport.length && quesReport[index].saw == true) {
                     quesReport[index].attempt = true;
                     howManySkipped--;
                     quesAttempted++;
-                } else {
+                } else if(index <quesReport.length){
                     quesReport[index].saw = true;
                     quesReport[index].attempt = true;
                     quesAttempted++;
@@ -171,10 +301,10 @@ public class test extends AppCompatActivity {
                 }
 
             } else {
-                if (quesReport[index].saw == true) {
+                if (index <quesReport.length && quesReport[index].saw == true) {
                     quesReport[index].attempt = false;
 
-                } else {
+                } else if(index <quesReport.length ){
                     quesReport[index].saw = true;
                     quesReport[index].attempt = false;
                     howManySkipped++;
@@ -186,9 +316,9 @@ public class test extends AppCompatActivity {
             if (selected != -1) {
                 RadioButton select = findViewById(selected);
                 String selectedOption = select.getText().toString();
-                if (arr[index].a.equals(selectedOption)) {
+                if (index <quesReport.length && arr[index].a.equals(selectedOption)) {
                     arr[index].option = 0;
-                } else {
+                } else if(index <quesReport.length ) {
                     arr[index].option = 1;
                 }
             }

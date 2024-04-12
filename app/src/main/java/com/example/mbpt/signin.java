@@ -60,6 +60,7 @@ public class signin extends AppCompatActivity {
                                 registerData rd=dataSnapshot.getValue(registerData.class);
                                 if(rd.password.equals(password)){
                                     Intent intent=new Intent(signin.this,Home.class);
+                                    intent.putExtra("source","signIn");
                                     intent.putExtra("name",rd.name);
                                     intent.putExtra("uid",rd.uid);
                                     Toast.makeText(getApplicationContext(),"Signed In successfully",Toast.LENGTH_SHORT).show();
