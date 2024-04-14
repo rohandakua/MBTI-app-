@@ -118,9 +118,11 @@
             android:layout_width="301dp"
             android:layout_height="54dp"
             android:textColor="@color/white"
+
+            app:passwordToggleEnabled="false"
             android:textSize="20dp"
             android:id="@+id/tiet3"
-            android:inputType="text"
+            android:inputType="textPassword"
 
             android:fontFamily="sans-serif-thin"
             android:hint="Password" />

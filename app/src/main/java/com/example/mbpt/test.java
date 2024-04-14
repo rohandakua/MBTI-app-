@@ -114,8 +114,8 @@ public class test extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.hasChild(uid)) {
                                 // User exists, update their personality type
-                                DatabaseReference db = database.getReference("userPersonality/" + uid);
-                                db.setValue(new personalityData(uid, personalityType))
+                                DatabaseReference db = database.getReference("userPersonality");
+                                db.child(uid).setValue(new personalityData(uid, personalityType))
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
@@ -125,6 +125,7 @@ public class test extends AppCompatActivity {
                                                 i.putExtra("source", "test");
                                                 i.putExtra("personalityType", personalityType);
                                                 startActivity(i);
+                                                finish();
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
@@ -135,8 +136,8 @@ public class test extends AppCompatActivity {
                                         });
                             } else {
                                 // User doesn't exist, add their personality type
-                                DatabaseReference db = database.getReference("userPersonality/" + uid);
-                                db.setValue(new personalityData(uid, personalityType))
+                                DatabaseReference db = database.getReference("userPersonality");
+                                db.child(uid).setValue(new personalityData(uid, personalityType))
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
@@ -146,6 +147,7 @@ public class test extends AppCompatActivity {
                                                 i.putExtra("source", "test");
                                                 i.putExtra("personalityType", personalityType);
                                                 startActivity(i);
+                                                finish();
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
