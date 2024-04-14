@@ -133,6 +133,7 @@
         app:helperTextTextColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/btn2"
 
+
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/til2"
@@ -146,7 +147,8 @@
             android:layout_height="54dp"
             android:fontFamily="sans-serif-thin"
             android:hint="Password"
-            android:inputType="text"
+            android:inputType="textPassword"
+            app:passwordToggleEnabled="false"
 
             android:textColor="@color/white"
             android:textSize="20dp" />

@@ -4,4 +4,5 @@
     <string name="estpt">he</string>
     <string name="sign_out">Sign Out</string>
     <string name="estptext">ESTP\n\nThe\nEntrepeneneur</string>
+    <string name="defaultMsg">"Hello :) "</string>
 </resources>
